@@ -17,3 +17,11 @@ https://github.com/unitedstates/congress-legislators
 File: legislators-current
 Download: CSV
 ```
+
+# Interacting with Skill
+
+Alexa legislators contact info
+
+Alexa: Will read "Welcome" asking  "Which legislator are you wanting to contact?"
+
+Consumer: "Mitch McConnell" or "Kirsten Gillibrand" etc...
