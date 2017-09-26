@@ -1,0 +1,28 @@
+{
+  "intents": [
+    {
+      "slots": [
+        {
+          "name": "LegislatorName",
+          "type": "LIST_LEGISTATORS"
+        }
+      ],
+      "intent": "Legislators"
+    },
+    {
+      "intent": "ReturnPhone"
+    },
+    {
+      "intent": "AMAZON.RepeatIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    }
+  ]
+}

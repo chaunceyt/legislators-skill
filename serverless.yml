@@ -1,0 +1,16 @@
+service: legislators-phone-numbers
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: us-east-1
+  timeout: 10
+
+functions:
+  legislator_phone:
+    name: legislators-phone-numbers-legislator_phone-${self:provider.stage}
+    description: U.S. Legislators Phone Numbers
+    handler: handler.legislator_phone
+    events:
+      - alexaSkill

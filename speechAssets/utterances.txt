@@ -1,0 +1,7 @@
+Legislators {LegislatorName}
+Legislators What is {LegislatorName} phone number and address
+Legislators What is the phone number and address for {LegislatorName}
+Legislators Tell me about {LegislatorName}
+Legislators How do I contact {LegislatorName}
+Legislators Contact info for legislator  {LegislatorName}
+Legislators The phone number and mailing address for {LegislatorName}
