@@ -18,7 +18,7 @@ var handlers = {
   },
 
   'Welcome': function () {
-    var prompt = "Hello, Welcome to the U.S. Legislators Contact info Service!. Which legislator are you wanting to contact?";
+    var prompt = "Hello, Welcome to the U.S. Legislators Contact info system!. Which legislator are you wanting to contact?";
     this.emit(':ask', prompt, DEFAULT_REPROMPT);
   },
 
@@ -31,7 +31,7 @@ var handlers = {
       this.emit('ReturnPhoneAddress', lawmaker);
     }
     else {
-      var notFoundPrompt = "I'm sorry, I could not understand that Legislators name. Please try again.";
+      var notFoundPrompt = "I'm sorry, I could not understand that Legislators name. Please try again, saying their first and last name.";
       this.emit(':ask', notFoundPrompt, DEFAULT_REPROMPT);
     }
   },
@@ -43,8 +43,13 @@ var handlers = {
 
     if (dataSet.lawmakers.hasOwnProperty(lawmaker)) {
       var object = dataSet.lawmakers[lawmaker];
+      var district_str = '';
 
-      var lawmakerPrompt = "The office phone number for "+ object.party + " " + object.type + " " + lawmaker +  " from " + object.state
+      if (object.type === 'Representative') {
+        district_str += ", distrist " + object.district;
+      }
+
+      var lawmakerPrompt = "The office phone number for "+ object.party + " " + object.type + " " + lawmaker +  " from " + object.state + "" + district_str
         lawmakerPrompt += " is " + object.phone + " and " + object.gender_ref + " office mailing address is " + object.address;
 
       this.attributes['handler'] = "ReturnPhoneAddress";
@@ -74,11 +79,12 @@ var handlers = {
   },
 
   'AMAZON.StopIntent': function () {
-    this.emit(':tell', 'Goodbye!');
+    this.emit(':tell', 'Okay, see you next time!');
   },
 
   'AMAZON.HelpIntent': function () {
-    var prompt = "Welcome to the U.S Legislators Contact info service. When asked which legislator are you wanting to contact. Just speak the legislators firstname and lastname.";
+    var prompt = "Welcome to the U.S Legislators Contact info service. The information here relates to the 115th United States Congress (January 3, 2017 – January 3, 2019)."
+    promt += "When asked which legislator are you wanting to contact. Just speak the legislators firstname and lastname.";
     prompt += DELAYED_REPROMPT;
     this.emit(':ask', prompt, prompt);
   }
