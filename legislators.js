@@ -1,7 +1,9 @@
 'use strict';
 
 var DEFAULT_REPROMPT = "Which legislator are you wanting to contact?",
-    DELAYED_REPROMPT = "<break time='2500ms'/>" + DEFAULT_REPROMPT;
+    DELAYED_REPROMPT = "<break time='2500ms'/>" + DEFAULT_REPROMPT,
+    DEFAULT_NOTFOUNDPROMPT = "I'm sorry, I could not understand that Legislators name. Please try again, saying their first and last name.",
+    DEFAULT_WELCOMEPROMPT = "Hello, Welcome to the U.S. Legislators Contact info system!. Which legislator are you wanting to contact?";
 
 // The phone number and address of current congress
 var dataSet = require("./legislators_data.js");
@@ -18,7 +20,7 @@ var handlers = {
   },
 
   'Welcome': function () {
-    var prompt = "Hello, Welcome to the U.S. Legislators Contact info system!. Which legislator are you wanting to contact?";
+    var prompt = DEFAULT_WELCOMEPROMPT;
     this.emit(':ask', prompt, DEFAULT_REPROMPT);
   },
 
@@ -31,7 +33,7 @@ var handlers = {
       this.emit('ReturnPhoneAddress', lawmaker);
     }
     else {
-      var notFoundPrompt = "I'm sorry, I could not understand that Legislators name. Please try again, saying their first and last name.";
+      var notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
       this.emit(':ask', notFoundPrompt, DEFAULT_REPROMPT);
     }
   },
@@ -60,7 +62,7 @@ var handlers = {
 
     }
     else {
-      var notFoundPrompt = "I'm sorry, we were not able to find " + lawmaker + " please try again.";
+      var notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
       this.emit(':ask', notFoundPrompt, DEFAULT_REPROMPT);
     }
   },
