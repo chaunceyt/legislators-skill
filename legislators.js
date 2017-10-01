@@ -1,21 +1,24 @@
 'use strict';
+
 const AWSregion = 'us-east-1';
 const AWS = require('aws-sdk');
+const LEGISLATORS_APP_TABLE_NAME = 'current-legislators-dev';
 
 AWS.config.update({
     region: AWSregion
 });
 
-var DEFAULT_REPROMPT = "Which legislator are you wanting to contact? or for instructions, please say help me.",
+var DEFAULT_REPROMPT = "Which legislator are you wanting to contact? or for instructions, please say help, help me or can you help me.",
     DELAYED_REPROMPT = "<break time='2500ms'/>" + DEFAULT_REPROMPT,
     DEFAULT_NOTFOUNDPROMPT = "I'm sorry, I could not understand that Legislators name. Please try again, saying their first and last name.",
     DEFAULT_WELCOMEPROMPT = "Hello, Welcome to the U.S. Legislators Contact info system!. Which legislator are you wanting to contact?",
     DEFAULT_NOINTENT = 'Okay, see you next time!'
 
-// The phone number and address of current congress
+// The bioguide_id, state and bioguide_data for current congress.
 var jsonDataSet = require("./legislators_data.js");
 
-// Define the voice handlers
+
+// Setup handlers.
 var handlers = {
 
   'LaunchRequest': function () {
@@ -75,6 +78,7 @@ var handlers = {
 //=========================================================================================================================================
 // Legislator: Contact information.
 //=========================================================================================================================================
+
   'Legislators': function () {
     console.log("LegislatorName SLOT: " + this.event.request.intent.slots.LegislatorName.value);
 
@@ -99,7 +103,7 @@ var handlers = {
 
       // Setup our DynamoDB params
       const params = {
-        TableName: 'current-legislators-dev',
+        TableName: LEGISLATORS_APP_TABLE_NAME,
         Key:{
           "id": object.bioguide_id
         }
@@ -133,6 +137,7 @@ var handlers = {
           dataSet.Item.type = 'Senator';
         }
         else {
+          // deal with rep.
           dataSet.Item.type = 'Representative';
         }
 
@@ -140,7 +145,8 @@ var handlers = {
         lawmakerPrompt += " from " + object.state  + "" + district_str
         lawmakerPrompt += " is " + dataSet.Item.phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.address
         lawmakerPrompt += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/> Get bioguide for " + lawmaker
-        lawmakerPrompt += "<break time='1000ms'/> or find additional information on WikiPedia by searching for " + dataSet.Item.wikipedia_id;
+        lawmakerPrompt += "<break time='1000ms'/> if you want to call " + lawmaker + " now you can just say, Alexa dial " + dataSet.Item.phone
+        lawmakerPrompt += "<break time='1000ms'/> or say help me";
 
         this.attributes['handler'] = "ReturnPhoneAddress";
         this.attributes['lawmaker'] = lawmaker;
@@ -164,7 +170,22 @@ var handlers = {
     else {
       this.emit(this.attributes['handler']);
     }
+
+    if (this.attributes['handler'] === "AMAZON.HelpIntent") {
+      this.emit(this.attributes['handler']);
+    }
   },
+
+//=========================================================================================================================================
+// AMAZON.buildin intents.
+// https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/supported-phrases-to-begin-a-conversation
+// CancelIntent cancel, never mind, forget it
+// HelpIntent help, help me, can you help me
+// NoIntent no, no thanks
+// RepeatIntent repeat, say that again, repeat that
+// StopIntent stop. off, shut up
+// YesIntent yes, yes please, sure
+//=========================================================================================================================================
 
   'AMAZON.CancelIntent': function () {
     this.emit(':tell', 'Goodbye!');
@@ -180,15 +201,21 @@ var handlers = {
    },
 
   'AMAZON.HelpIntent': function () {
-    var prompt = "Welcome to the U.S Legislators Contact info service. The information here relates to the 115th United States Congress (January 3, 2017 thru January 3, 2019)."
-    prompt += "When asked which legislator are you wanting to contact. Just speak the legislators firstname and lastname"
-    prompt += "<break time='1000ms'/> or you can say Get bioguide for firstname and lastname"
-    prompt += "<break time='1000ms'/> or you can say exit....";
+    this.attributes['handler'] = "AMAZON.HelpIntent";
+    var prompt = "Welcome to the U.S Legislators Contact info service. The information here relates to the 115th United States Congress January 3, 2017 thru January 3, 2019"
+    prompt += "When asked which legislator are you wanting to contact, Just speak the legislators firstname and lastname"
+    prompt += "<break time='1500ms'/> or you can say Get bioguide for firstname and lastname"
+    prompt += "<break time='1500ms'/> or you can say cancel, never mind, forget it...."
     prompt += DELAYED_REPROMPT;
     this.emit(':ask', prompt, prompt);
   }
 
 };
+
+//=========================================================================================================================================
+// Helper functions:
+// readDynamoItem get legislators data based on id: bioguide_id
+//=========================================================================================================================================
 
 function readDynamoItem(params, callback) {
 
@@ -204,9 +231,7 @@ function readDynamoItem(params, callback) {
             console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
         } else {
             console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
-
             callback(data);  // this particular row has an attribute called message
-
         }
     });
 
