@@ -116,10 +116,6 @@ var handlers = {
         var gender_ref = '';
         var district_str = '';
 
-        if (dataSet.Item.type === 'Representative') {
-          district_str += ", distrist " + dataSet.Item.district;
-        }
-
         if (dataSet.Item.gender === 'M') {
           gender_ref = "his";
         }
@@ -140,6 +136,11 @@ var handlers = {
           // deal with rep.
           dataSet.Item.type = 'Representative';
         }
+
+        // If this is a Representative mention their district.
+         if (dataSet.Item.type === 'Representative') {
+            district_str += ", district " + object.district;
+         }
 
         var lawmakerPrompt = "The office phone number for "+ dataSet.Item.party + " " + dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name 
         lawmakerPrompt += " from " + object.state  + "" + district_str
