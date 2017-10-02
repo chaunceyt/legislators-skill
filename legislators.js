@@ -39,8 +39,6 @@ var handlers = {
 //=========================================================================================================================================
 
   'Bioguide': function () {
-    console.log("LegislatorName SLOT: " + this.event.request.intent.slots.LegislatorName.value);
-
     var lawmaker = this.event.request.intent.slots.LegislatorName.value || false;
 
     if (lawmaker) {
@@ -53,9 +51,7 @@ var handlers = {
   },
 
   'ReturnBioguide': function (legislatorName) {
-
     var lawmaker = legislatorName.toLowerCase();
-    console.log("Legislator Name: " + lawmaker);
 
     if (jsonDataSet.lawmakers.hasOwnProperty(lawmaker)) {
       var object = jsonDataSet.lawmakers[lawmaker];
@@ -80,8 +76,6 @@ var handlers = {
 //=========================================================================================================================================
 
   'Legislators': function () {
-    console.log("LegislatorName SLOT: " + this.event.request.intent.slots.LegislatorName.value);
-
     var lawmaker = this.event.request.intent.slots.LegislatorName.value || false;
 
     if (lawmaker) {
@@ -96,7 +90,6 @@ var handlers = {
   'ReturnPhoneAddress': function (legislatorName) {
 
     var lawmaker = legislatorName.toLowerCase();
-    console.log("Legislator Name: " + lawmaker);
 
     if (jsonDataSet.lawmakers.hasOwnProperty(lawmaker)) {
       var object = jsonDataSet.lawmakers[lawmaker];
@@ -225,14 +218,12 @@ function readDynamoItem(params, callback) {
 
     var docClient = new AWS.DynamoDB.DocumentClient();
 
-    console.log('reading item from DynamoDB table');
-
     docClient.get(params, (err, data) => {
         if (err) {
             console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
         } else {
-            console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
-            callback(data);  // this particular row has an attribute called message
+            // console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+            callback(data);
         }
     });
 
