@@ -1,7 +1,7 @@
 {
-  "name": "legislators-phone-numbers",
+  "name": "legislators-contact-info",
   "version": "1.0.0",
-  "description": "Alexa Skill U.S. Legislators Phone Numbers",
+  "description": "U.S. Legislators Contact Info Alexa Skill",
   "main": "handler.js",
   "dependencies": {
     "alexa-sdk": "^1.0.14",

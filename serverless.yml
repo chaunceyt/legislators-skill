@@ -1,4 +1,4 @@
-service: legislators-phone-numbers
+service: legislators-contact-info
 
 provider:
   name: aws
@@ -8,9 +8,9 @@ provider:
   timeout: 10
 
 functions:
-  legislator_phone:
-    name: legislators-phone-numbers-legislator_phone-${self:provider.stage}
-    description: U.S. Legislators Phone Numbers
-    handler: handler.legislator_phone
+  legislators_contact_info:
+    name: legislators-contact-info
+    description: U.S. Legislators Contact Info
+    handler: handler.legislators_contact_info
     events:
       - alexaSkill
