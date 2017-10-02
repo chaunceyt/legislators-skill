@@ -25,3 +25,11 @@ Alexa legislators contact info
 Alexa: Will read "Welcome" asking  "Which legislator are you wanting to contact?"
 
 Consumer: "Mitch McConnell" or "Kirsten Gillibrand" etc...
+
+Consumer: Get Bioguide for "Mitch McConnell" or "Kirsten Gillibrand" etc...
+
+Alexa: will read content from Bioguide
+
+"Mitch McConnell" http://bioguide.congress.gov/scripts/biodisplay.pl?index=M000355
+
+"Kirsten Gillibrand" http://bioguide.congress.gov/scripts/biodisplay.pl?index=G000555
