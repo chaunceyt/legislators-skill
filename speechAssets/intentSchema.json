@@ -7,10 +7,16 @@
           "type": "LIST_LEGISTATORS"
         }
       ],
-      "intent": "Legislators"
+      "intent": "Bioguide"
     },
     {
-      "intent": "ReturnPhone"
+      "slots": [
+        {
+          "name": "LegislatorName",
+          "type": "LIST_LEGISTATORS"
+        }
+      ],
+      "intent": "Legislators"
     },
     {
       "intent": "AMAZON.RepeatIntent"

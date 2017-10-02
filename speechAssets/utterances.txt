@@ -1,1 +1,2 @@
 Legislators {LegislatorName}
+Bioguide Get bioguide for {LegislatorName}
