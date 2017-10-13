@@ -7,6 +7,24 @@
           "type": "LIST_LEGISTATORS"
         }
       ],
+      "intent": "Obamacare"
+    },
+    {
+      "slots": [
+        {
+          "name": "LegislatorName",
+          "type": "LIST_LEGISTATORS"
+        }
+      ],
+      "intent": "GunControl"
+    },
+    {
+      "slots": [
+        {
+          "name": "LegislatorName",
+          "type": "LIST_LEGISTATORS"
+        }
+      ],
       "intent": "Bioguide"
     },
     {
