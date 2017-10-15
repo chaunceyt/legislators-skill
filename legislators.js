@@ -16,7 +16,7 @@ var DEFAULT_REPROMPT = "Who is your legislator? or for instructions, please say 
     DEFAULT_NOINTENT = 'Okay, see you next time!'
 
 // The bioguide_id, state and bioguide_data for current congress.
-var jsonDataSet = require("./data/legislators_data.js");
+var legislatorsDataSet = require("./data/legislators_data.js");
 var currentGunContrbutionDataSet = require("./data/legislators_gun_money_contributions.js");
 var careerGunContrbutionDataSet = require("./data/legislators_gun_money_contributions_career.js");
 
@@ -67,8 +67,8 @@ var handlers = {
     'ReturnObamacare': function (legislatorName) {
       var lawmaker = legislatorName.toLowerCase();
 
-      if (jsonDataSet.lawmakers.hasOwnProperty(lawmaker)) {
-        var object = jsonDataSet.lawmakers[lawmaker];
+      if (legislatorsDataSet.lawmakers.hasOwnProperty(lawmaker)) {
+        var object = legislatorsDataSet.lawmakers[lawmaker];
 
         // Setup our DynamoDB params
         const params = {
@@ -102,13 +102,19 @@ var handlers = {
             }
             lawmakerPrompt += "<break time='1000ms'/>On March 23, 2010 H.R. 3590 was Enacted — Signed by the President"
             lawmakerPrompt += "<break time='1000ms'/> You can get additional information if you say <break time='300ms'/> gun control contributions for " + lawmaker + ".";
+            var LegislatorimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/225x275/" + object.bioguide_id + ".jpg";
+            // console.log("Image Path: " + LegislatorimageUrlPath);
 
+            var imageObj = {
+                      smallImageUrl: LegislatorimageUrlPath,
+                      largeImageUrl: LegislatorimageUrlPath
+                };
         this.attributes['handler'] = "ReturnObamacare";
         this.attributes['lawmaker'] = lawmaker;
 
         var cardTitle = lawmaker.toUpperCase();
-        //this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, lawmakerPrompt);
-        this.emit(':ask', lawmakerPrompt, DEFAULT_REPROMPT, lawmakerPrompt);
+        var cardContent = lawmaker + "'s stance on Obamacare";
+        this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
         });
 
@@ -138,9 +144,10 @@ var handlers = {
       'ReturnGunControl': function (legislatorName) {
         var lawmaker = legislatorName.toLowerCase();
 
-        if (jsonDataSet.lawmakers.hasOwnProperty(lawmaker)) {
-          var object = jsonDataSet.lawmakers[lawmaker];
+        if (legislatorsDataSet.lawmakers.hasOwnProperty(lawmaker)) {
+          var object = legislatorsDataSet.lawmakers[lawmaker];
           // Setup our DynamoDB params
+          // Move this into a function.
           const params = {
             TableName: LEGISLATORS_APP_TABLE_NAME,
             Key:{
@@ -175,12 +182,21 @@ var handlers = {
                 GunControlResponse += "<break time='1000ms'/> and those who oppose gun rights, total  " + careerGunControlContribution.gun_rights_opposed
                 GunControlResponse += "<break time='1500ms'/> The source for this information on " + lawmaker + " is from OpenSecrets.org"
                 GunControlResponse += "<break time='1000ms'/> You can get additional information by saying, Obamacare and " + lawmaker;
+                // Move this to a function need to stay DRY.
+                var LegislatorimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/225x275/" + object.bioguide_id + ".jpg";
+                // console.log("Image Path: " + LegislatorimageUrlPath);
+
+                var imageObj = {
+                          smallImageUrl: LegislatorimageUrlPath,
+                          largeImageUrl: LegislatorimageUrlPath
+                    };
 
            this.attributes['handler'] = "ReturnGunControl";
            this.attributes['lawmaker'] = lawmaker;
 
            var cardTitle = lawmaker.toUpperCase();
-           this.emit(':askWithCard', GunControlResponse, DEFAULT_REPROMPT, cardTitle, GunControlResponse);
+           var cardContent = "Gun related contributions in 2016 to " + lawmaker + " and gun related contributions for the career if this legislator."
+           this.emit(':askWithCard', GunControlResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
           });
 
         }
@@ -210,17 +226,24 @@ var handlers = {
   'ReturnBioguide': function (legislatorName) {
     var lawmaker = legislatorName.toLowerCase();
 
-    if (jsonDataSet.lawmakers.hasOwnProperty(lawmaker)) {
-      var object = jsonDataSet.lawmakers[lawmaker];
+    if (legislatorsDataSet.lawmakers.hasOwnProperty(lawmaker)) {
+      var object = legislatorsDataSet.lawmakers[lawmaker];
 
       var lawmakerPrompt = "The biographical information for " + object.bioguide_data
           lawmakerPrompt += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/>  how did " + lawmaker  + "  vote on Obamacare.";
+          var LegislatorimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/225x275/" + object.bioguide_id + ".jpg";
+          // console.log("Image Path: " + LegislatorimageUrlPath);
 
+          var imageObj = {
+                    smallImageUrl: LegislatorimageUrlPath,
+                    largeImageUrl: LegislatorimageUrlPath
+              };
       this.attributes['handler'] = "ReturnBioguide";
       this.attributes['lawmaker'] = lawmaker;
 
       var cardTitle = lawmaker.toUpperCase();
-      this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, lawmakerPrompt);
+      var cardContent = "The biographical information for " + lawmaker;
+      this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
     }
     else {
@@ -249,8 +272,8 @@ var handlers = {
 
     var lawmaker = legislatorName.toLowerCase();
 
-    if (jsonDataSet.lawmakers.hasOwnProperty(lawmaker)) {
-      var object = jsonDataSet.lawmakers[lawmaker];
+    if (legislatorsDataSet.lawmakers.hasOwnProperty(lawmaker)) {
+      var object = legislatorsDataSet.lawmakers[lawmaker];
 
       // Setup our DynamoDB params
       const params = {
@@ -310,7 +333,8 @@ var handlers = {
         this.attributes['lawmaker'] = lawmaker;
 
         var cardTitle = lawmaker.toUpperCase();
-        this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, lawmakerPrompt, imageObj);
+        var cardContent = "Contact information for " + lawmaker;
+        this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
       });
 
