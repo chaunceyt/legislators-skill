@@ -16,7 +16,9 @@ var DEFAULT_REPROMPT = "Who is your legislator? or for instructions, please say 
     DEFAULT_NOINTENT = 'Okay, see you next time!'
 
 // The bioguide_id, state and bioguide_data for current congress.
-var jsonDataSet = require("./legislators_data.js");
+var jsonDataSet = require("./data/legislators_data.js");
+var currentGunContrbutionDataSet = require("./data/legislators_gun_money_contributions.js");
+var careerGunContrbutionDataSet = require("./data/legislators_gun_money_contributions_career.js");
 
 // Setup some random goodbyes.
 const randomGoodbyes = [
@@ -138,16 +140,48 @@ var handlers = {
 
         if (jsonDataSet.lawmakers.hasOwnProperty(lawmaker)) {
           var object = jsonDataSet.lawmakers[lawmaker];
+          // Setup our DynamoDB params
+          const params = {
+            TableName: LEGISLATORS_APP_TABLE_NAME,
+            Key:{
+              "id": object.bioguide_id
+            }
+          };
+          // Get legislator data from DynamoDB
+          readDynamoItem(params, dataSet=>{
+            // console.log("Data: ", JSON.stringify(dataSet));
+            var currentGunContribution = currentGunContrbutionDataSet.gun_money_contributions[dataSet.Item.opensecrets_id];
+            var careerGunControlContribution = careerGunContrbutionDataSet.gun_money_contributions_career[dataSet.Item.opensecrets_id];
 
-          var lawmakerPrompt = "The current information we have for " + lawmaker + " in reference to Gun Control is pending.";
-              lawmakerPrompt += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/>  how did " + lawmaker + " vote on Obamacare.";
+            // console.log("dataSet.Item.opensecrets_id" + dataSet.Item.opensecrets_id + "DataSet" + currentGunContrbutionDataSet.gun_money_contributions[dataSet.Item.opensecrets_id]);
+            // console.log("Data: ", JSON.stringify(currentGunContribution));
+            //console.log("GunControlResponse: " + currentGunContribution);
+            var GunControlResponse = lawmaker + " contrubutions for the 115 Congress based on the following categories."
+                GunControlResponse += "<break time='1000ms'/> Gun related contributions in 2016 to " + lawmaker + "'s <break time='1000ms'/> and Gun related contributions for the career if this legislator."
+                GunControlResponse += "<break time='1000ms'/> each section has six categories within it."
+                GunControlResponse += "<break time='1500ms'/> " + lawmaker + "'s contributions for the 2016."
+                GunControlResponse += "<break time='1000ms'/> PACS for Gun Control, total " + currentGunContribution.pacs_total_from_gun_control
+                GunControlResponse += "<break time='1000ms'/> PACS for Gun Rights, total " + currentGunContribution.pacs_total_from_gun_rights
+                GunControlResponse += "<break time='1000ms'/> those who support gun control, total " + currentGunContribution.gun_control_support
+                GunControlResponse += "<break time='1000ms'/> those who oppose gun control, total " + currentGunContribution.gun_control_opposed
+                GunControlResponse += "<break time='1000ms'/> those who support gun rights, total " + currentGunContribution.gun_rights_support
+                GunControlResponse += "<break time='1000ms'/> and those who oppose gun rights, total  " + currentGunContribution.gun_rights_opposed
+                GunControlResponse += "<break time='1500ms'/> The career contributions for " + lawmaker + "."
+                GunControlResponse += "<break time='1000ms'/> PACS for Gun Control, total " + careerGunControlContribution.pacs_total_from_gun_control
+                GunControlResponse += "<break time='1000ms'/> PACS for Gun Rights, total " + careerGunControlContribution.pacs_total_from_gun_rights
+                GunControlResponse += "<break time='1000ms'/> those who support gun control, total " + careerGunControlContribution.gun_control_support
+                GunControlResponse += "<break time='1000ms'/> those who oppose gun control, total " + careerGunControlContribution.gun_control_opposed
+                GunControlResponse += "<break time='1000ms'/> those who support gun rights, total " + careerGunControlContribution.gun_rights_support
+                GunControlResponse += "<break time='1000ms'/> and those who oppose gun rights, total  " + careerGunControlContribution.gun_rights_opposed
+                GunControlResponse += "<break time='1500ms'/> The source for this information on " + lawmaker + " is from OpenSecrets.org"
+                GunControlResponse += "<break time='1000ms'/> You can get additional information by saying, Obamacare and " + lawmaker;
 
+           this.attributes['handler'] = "ReturnGunControl";
+           this.attributes['lawmaker'] = lawmaker;
 
-          this.attributes['handler'] = "ReturnGunControl";
-          this.attributes['lawmaker'] = lawmaker;
-
-          var cardTitle = lawmaker.toUpperCase();
-          this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, lawmakerPrompt);
+           var cardTitle = lawmaker.toUpperCase();
+           this.emit(':askWithCard', GunControlResponse, DEFAULT_REPROMPT, cardTitle, GunControlResponse);
+          });
 
         }
         else {
