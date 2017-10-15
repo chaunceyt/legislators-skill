@@ -6,7 +6,8 @@
   "dependencies": {
     "alexa-sdk": "^1.0.14",
     "cheerio": "0.22.0",
-    "request": "2.82.0"
+    "request": "2.82.0",
+    "opearlo-analytics": "0.2.5"
   },
   "devDependencies": {},
   "scripts": {

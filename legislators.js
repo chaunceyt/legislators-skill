@@ -1,6 +1,8 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+// Opearlo Analytics
+var OpearloAnalytics = require('opearlo-analytics');
 
 const AWSregion = 'us-east-1';
 const LEGISLATORS_APP_TABLE_NAME = 'current-legislators-dev';
@@ -84,38 +86,40 @@ var handlers = {
           var legislatorType = dataSet.Item.type;
 
         // Send our response.
-        var lawmakerPrompt = "Obamacare, is the nickname for the Patient Protection and Affordable Care Act. Obamacare was enacted after being signed by the President on March 23, 2010."
-            lawmakerPrompt += "<break time='1000ms'/>Additional important dates are."
-            lawmakerPrompt += "<break time='1000ms'/>On September 17, 2009 the bill was introduced in the 111th Congress, On October 8, 2009 it Passed the  House and was sent to the senate. "
+        var ObamacareResponse = "Obamacare, is the nickname for the Patient Protection and Affordable Care Act. Obamacare was enacted after being signed by the President on March 23, 2010."
+            ObamacareResponse += "<break time='1000ms'/>Additional important dates are."
+            ObamacareResponse += "<break time='1000ms'/>On September 17, 2009 the bill was introduced in the 111th Congress, On October 8, 2009 it Passed the  House and was sent to the senate. "
             // Only say this if legilsator voted and is a Rep.
             if (legislatorType === "rep") {
-                lawmakerPrompt += legislator + " voted Yea/Nay."
+                ObamacareResponse += legislator + " voted Yea/Nay."
             }
-            lawmakerPrompt += "<break time='1000ms'/>On December 24, 2009 the bill passed the senate with changes and was sent back to the house."
+            ObamacareResponse += "<break time='1000ms'/>On December 24, 2009 the bill passed the senate with changes and was sent back to the house."
             // Only say this if legilsator voted and is a Sen.
             if (legislatorType === "sen") {
-              lawmakerPrompt += legislator + " voted Yea/Nay."
+              ObamacareResponse += legislator + " voted Yea/Nay."
             }
-            lawmakerPrompt += "<break time='1000ms'/>On March 21, 2010 House Agreed to Changes. "
+            ObamacareResponse += "<break time='1000ms'/>On March 21, 2010 House Agreed to Changes. "
             // Only say this if legilsator voted and is a Rep.
             if (legislatorType === "rep") {
-              lawmakerPrompt += legislator + " voted Yea/Nay."
+              ObamacareResponse += legislator + " voted Yea/Nay."
             }
-            lawmakerPrompt += "<break time='1000ms'/>On March 23, 2010 H.R. 3590 was Enacted — Signed by the President"
-            lawmakerPrompt += "<break time='1000ms'/> You can get additional information if you say <break time='300ms'/> gun control contributions for " + legislator + ".";
-            var LegislatorimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/225x275/" + object.bioguide_id + ".jpg";
+            ObamacareResponse += "<break time='1000ms'/>On March 23, 2010 H.R. 3590 was Enacted — Signed by the President"
+            ObamacareResponse += "<break time='1000ms'/> You can get additional information if you say <break time='300ms'/> gun control contributions for " + legislator + ".";
+
+            var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
+            var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
             // console.log("Image Path: " + LegislatorimageUrlPath);
 
             var imageObj = {
-                      smallImageUrl: LegislatorimageUrlPath,
-                      largeImageUrl: LegislatorimageUrlPath
-                };
+              smallImageUrl: LegislatorSmallimageUrlPath,
+              largeImageUrl: LegislatorLargeimageUrlPath
+            };
         this.attributes['handler'] = "ReturnObamacare";
         this.attributes['lawmaker'] = legislator;
 
         var cardTitle = legislator.toUpperCase();
         var cardContent = legislator + "'s stance on Obamacare";
-        this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
+        this.emit(':askWithCard', ObamacareResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
         });
 
@@ -157,6 +161,16 @@ var handlers = {
           };
           // Get legislator data from DynamoDB
           readDynamoItem(params, dataSet=>{
+
+            var gender_ref = '';
+
+            if (dataSet.Item.gender === 'M') {
+              gender_ref = "his";
+            }
+            else {
+              gender_ref = 'her';
+            }
+
             // console.log("Data: ", JSON.stringify(dataSet));
             var currentGunContribution = currentGunContributionDataSet.gun_money_contributions[dataSet.Item.opensecrets_id];
             var careerGunControlContribution = careerGunContrbutionDataSet.gun_money_contributions_career[dataSet.Item.opensecrets_id];
@@ -166,7 +180,7 @@ var handlers = {
             // console.log("Data: ", JSON.stringify(currentGunContribution));
             //console.log("GunControlResponse: " + currentGunContribution);
             var GunControlResponse = legislator + " contrubutions for the 115 Congress based on the following categories."
-                GunControlResponse += "<break time='1000ms'/> Gun related contributions in 2016 to " + legislator + "'s <break time='1000ms'/>,  Gun related contributions for the career if this legislator and all NRA contributions."
+                GunControlResponse += "<break time='1000ms'/> Gun related contributions in 2016 to " + legislator + " <break time='500ms'/>,  Gun related contributions for " + gender_ref + " career and all NRA contributions."
                 GunControlResponse += "<break time='1000ms'/> each section has six categories within it."
                 GunControlResponse += "<break time='1500ms'/> " + legislator + "'s contributions for the 2016."
                 GunControlResponse += "<break time='1000ms'/> PACS for Gun Control, total " + currentGunContribution.pacs_total_from_gun_control
@@ -195,13 +209,14 @@ var handlers = {
                 GunControlResponse += "<break time='1500ms'/> The source for this information on " + legislator + " is from OpenSecrets.org"
                 GunControlResponse += "<break time='1000ms'/> You can get additional information by saying, Obamacare and " + legislator;
                 // Move this to a function need to stay DRY.
-                var LegislatorimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/225x275/" + object.bioguide_id + ".jpg";
+                var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
+                var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
                 // console.log("Image Path: " + LegislatorimageUrlPath);
 
                 var imageObj = {
-                          smallImageUrl: LegislatorimageUrlPath,
-                          largeImageUrl: LegislatorimageUrlPath
-                    };
+                  smallImageUrl: LegislatorSmallimageUrlPath,
+                  largeImageUrl: LegislatorLargeimageUrlPath
+                };
 
            this.attributes['handler'] = "ReturnGunControl";
            this.attributes['lawmaker'] = legislator;
@@ -241,21 +256,24 @@ var handlers = {
     if (legislatorsDataSet.lawmakers.hasOwnProperty(legislator)) {
       var object = legislatorsDataSet.lawmakers[legislator];
 
-      var lawmakerPrompt = "The biographical information for " + object.bioguide_data
-          lawmakerPrompt += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/>  how did " + legislator  + "  vote on Obamacare.";
-          var LegislatorimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/225x275/" + object.bioguide_id + ".jpg";
-          // console.log("Image Path: " + LegislatorimageUrlPath);
+      var BioguideResponse = "The biographical information for " + object.bioguide_data
+          BioguideResponse += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/>  how did " + legislator  + "  vote on Obamacare.";
 
-          var imageObj = {
-                    smallImageUrl: LegislatorimageUrlPath,
-                    largeImageUrl: LegislatorimageUrlPath
-              };
+      var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
+      var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
+      // console.log("Image Path: " + LegislatorimageUrlPath);
+
+      var imageObj = {
+        smallImageUrl: LegislatorSmallimageUrlPath,
+        largeImageUrl: LegislatorLargeimageUrlPath
+      };
+
       this.attributes['handler'] = "ReturnBioguide";
       this.attributes['lawmaker'] = legislator;
 
       var cardTitle = legislator.toUpperCase();
       var cardContent = "The biographical information for " + legislator;
-      this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
+      this.emit(':askWithCard', BioguideResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
     }
     else {
@@ -328,25 +346,28 @@ var handlers = {
             district_str += ", district " + object.district;
          }
 
-        var lawmakerPrompt = "The office phone number for "+ dataSet.Item.party + " " + dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name
-            lawmakerPrompt += " from " + object.state  + "" + district_str
-            lawmakerPrompt += " is " + dataSet.Item.phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.address
-            lawmakerPrompt += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/> Get bioguide for " + legislator
-            lawmakerPrompt += "<break time='1000ms'/> if you want to call " + legislator + " now you can just say, Alexa dial " + dataSet.Item.phone
-            lawmakerPrompt += "<break time='1000ms'/> or say help me.";
-        var LegislatorimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/225x275/" + object.bioguide_id + ".jpg";
-        console.log("Image Path: " + LegislatorimageUrlPath);
+        var LegislatorsContactInfoResponse = "The office phone number for "+ dataSet.Item.party + " " + dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name
+            LegislatorsContactInfoResponse += " from " + object.state  + "" + district_str
+            LegislatorsContactInfoResponse += " is " + dataSet.Item.phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.address
+            LegislatorsContactInfoResponse += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/> Get bioguide for " + legislator
+            // LegislatorsContactInfoResponse += "<break time='1000ms'/> if you want to call " + legislator + " now you can just say, Alexa dial " + dataSet.Item.phone
+            LegislatorsContactInfoResponse += "<break time='1000ms'/> or say help me.";
+
+        var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
+        var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
+        // console.log("Image Path: " + LegislatorimageUrlPath);
 
         var imageObj = {
-                  smallImageUrl: LegislatorimageUrlPath,
-                  largeImageUrl: LegislatorimageUrlPath
-            };
+          smallImageUrl: LegislatorSmallimageUrlPath,
+          largeImageUrl: LegislatorLargeimageUrlPath
+        };
+
         this.attributes['handler'] = "ReturnLegislatorsContactInfo";
         this.attributes['lawmaker'] = legislator;
 
-        var cardTitle = legislator.toUpperCase();
-        var cardContent = "Contact information for " + legislator;
-        this.emit(':askWithCard', lawmakerPrompt, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
+        var cardTitle = dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name;
+        var cardContent = "Phone: " + dataSet.Item.phone + "\n Mailing Address: " + dataSet.Item.address + "\n\n Website: " + dataSet.Item.url;
+        this.emit(':askWithCard', LegislatorsContactInfoResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
       });
 
@@ -382,29 +403,35 @@ var handlers = {
 //=========================================================================================================================================
 
   'AMAZON.CancelIntent': function () {
-    this.emit(':tell', randomGoodbye);
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, process.env.OPEARLO_API_KEY, (result)=> {
+      this.emit(':tell', randomGoodbye);
+    });
   },
 
   'AMAZON.StopIntent': function () {
-    this.emit(':tell', randomGoodbye);
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, process.env.OPEARLO_API_KEY, (result)=> {
+      this.emit(':tell', randomGoodbye);
+    });
   },
 
   'AMAZON.NoIntent': function () {
      // Handle No intent.
-     this.emit(':tell', randomGoodbye);
+     OpearloAnalytics.recordAnalytics(this.event.session.user.userId, process.env.OPEARLO_API_KEY, (result)=> {
+       this.emit(':tell', randomGoodbye);
+     });
    },
 
   'AMAZON.HelpIntent': function () {
     this.attributes['handler'] = "AMAZON.HelpIntent";
-    var prompt = "Welcome to the U.S Legislators info service. The information here relates to the 115th United States Congress January 3, 2017 thru January 3, 2019"
-        prompt += "<break time='1500ms'/> You can say. Contact information for legislator, Just speak the legislator's firstname and lastname"
-        prompt += "<break time='1500ms'/> or you can say Get bioguide for firstname and lastname"
-        prompt += "<break time='1500ms'/> or you can say How did firstname and lastname vote on Obamacare"
-        prompt += "<break time='1500ms'/> or you can say Gun control contributions for firstname and lastname"
-        prompt += "<break time='1500ms'/> or you can say cancel, never mind, forget it...."
-        prompt += DELAYED_REPROMPT;
+    var HelpIntentPrompt = "Welcome to the U.S Legislators info service. The information here relates to the 115th United States Congress January 3, 2017 thru January 3, 2019"
+        HelpIntentPrompt += "<break time='1500ms'/> You can say. Contact information for legislator, Just speak the legislator's firstname and lastname"
+        HelpIntentPrompt += "<break time='1500ms'/> or you can say Get bioguide for firstname and lastname"
+        HelpIntentPrompt += "<break time='1500ms'/> or you can say How did firstname and lastname vote on Obamacare"
+        HelpIntentPrompt += "<break time='1500ms'/> or you can say Gun control contributions for firstname and lastname"
+        HelpIntentPrompt += "<break time='1500ms'/> or you can say cancel, never mind, forget it...."
+        HelpIntentPrompt += DELAYED_REPROMPT;
 
-    this.emit(':ask', prompt, prompt);
+    this.emit(':ask', HelpIntentPrompt, HelpIntentPrompt);
   }
 
 };
@@ -423,6 +450,8 @@ function readDynamoItem(params, callback) {
 
     docClient.get(params, (err, data) => {
         if (err) {
+            // Custom Voice Event
+            OpearloAnalytics.registerVoiceEvent(this.event.session.user.userId, "Custom", "DynamoDB Read Item Error");
             console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
         } else {
             // console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
