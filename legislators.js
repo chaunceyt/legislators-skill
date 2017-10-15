@@ -83,6 +83,14 @@ var handlers = {
         // Get legislator data from DynamoDB
         readDynamoItem(params, dataSet => {
           // console.log("Data: ", JSON.stringify(dataSet));
+          if (dataSet.Item.type == 'sen') {
+            dataSet.Item.type = 'Senator';
+          }
+          else {
+            // deal with rep.
+            dataSet.Item.type = 'Representative';
+          }
+
           var legislatorType = dataSet.Item.type;
 
         // Send our response.
@@ -90,21 +98,23 @@ var handlers = {
             ObamacareResponse += "<break time='1000ms'/>Additional important dates are."
             ObamacareResponse += "<break time='1000ms'/>On September 17, 2009 the bill was introduced in the 111th Congress, On October 8, 2009 it Passed the  House and was sent to the senate. "
             // Only say this if legilsator voted and is a Rep.
-            if (legislatorType === "rep") {
+            if (legislatorType === "Representative") {
                 ObamacareResponse += legislator + " voted Yea/Nay."
             }
             ObamacareResponse += "<break time='1000ms'/>On December 24, 2009 the bill passed the senate with changes and was sent back to the house."
             // Only say this if legilsator voted and is a Sen.
-            if (legislatorType === "sen") {
+            if (legislatorType === "Senator") {
               ObamacareResponse += legislator + " voted Yea/Nay."
             }
             ObamacareResponse += "<break time='1000ms'/>On March 21, 2010 House Agreed to Changes. "
             // Only say this if legilsator voted and is a Rep.
-            if (legislatorType === "rep") {
+            if (legislatorType === "Representative") {
               ObamacareResponse += legislator + " voted Yea/Nay."
             }
             ObamacareResponse += "<break time='1000ms'/>On March 23, 2010 H.R. 3590 was Enacted — Signed by the President"
-            ObamacareResponse += "<break time='1000ms'/> You can get additional information if you say <break time='300ms'/> gun control contributions for " + legislator + ".";
+            ObamacareResponse += "<break time='1500ms'/> The source for this information on " + legislator + " is from www.GovTrack.us"
+
+            ObamacareResponse += "<break time='1000ms'/> Would you like to hear about the gun control contributions to " + legislator + "?";
 
             var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
             var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
@@ -116,9 +126,17 @@ var handlers = {
             };
         this.attributes['handler'] = "ReturnObamacare";
         this.attributes['lawmaker'] = legislator;
+        this.attributes['NextIntent'] = 'ReturnGunControl';
 
-        var cardTitle = legislator.toUpperCase();
-        var cardContent = legislator + "'s stance on Obamacare";
+        var cardTitle = dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name;
+        var cardContent = "Stance on Obamacare" + "\n"
+            cardContent += "Bill URL: https://www.govtrack.us/congress/bills/111/hr3590" + "\n"
+            cardContent += "September 17, 2009 the bill was introduced in the 111th Congress" + "\n"
+            cardContent += "October 8, 2009 it Passed the  House and was sent to the senate., House Vote #768" + "\n"
+            cardContent += "December 24, 2009 the bill passed the senate with changes, Senate Vote #396" + "\n"
+            cardContent += "March 21, 2010 House Agreed to Changes, House Vote #165" + "\n"
+            cardContent += "March 23, 2010 H.R. 3590 was Enacted — Signed by the President" + "\n";
+            ;
         this.emit(':askWithCard', ObamacareResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
         });
@@ -164,6 +182,14 @@ var handlers = {
 
             var gender_ref = '';
 
+            if (dataSet.Item.type == 'sen') {
+              dataSet.Item.type = 'Senator';
+            }
+            else {
+              // deal with rep.
+              dataSet.Item.type = 'Representative';
+            }
+
             if (dataSet.Item.gender === 'M') {
               gender_ref = "his";
             }
@@ -207,7 +233,7 @@ var handlers = {
 
 
                 GunControlResponse += "<break time='1500ms'/> The source for this information on " + legislator + " is from OpenSecrets.org"
-                GunControlResponse += "<break time='1000ms'/> You can get additional information by saying, Obamacare and " + legislator;
+                GunControlResponse += "<break time='1000ms'/> Would you like to get information on another legislator?";
                 // Move this to a function need to stay DRY.
                 var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
                 var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
@@ -220,9 +246,11 @@ var handlers = {
 
            this.attributes['handler'] = "ReturnGunControl";
            this.attributes['lawmaker'] = legislator;
+           this.attributes['NextIntent'] = 'Welcome';
 
-           var cardTitle = legislator.toUpperCase();
-           var cardContent = "Gun related contributions in 2016 to " + legislator + " and gun related contributions for the career if this legislator."
+           var cardTitle = dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name;
+           var cardContent = "Gun related contributions in 2016 to " + dataSet.Item.first_name + " " + dataSet.Item.last_name + " and gun related contributions for the career if this legislator." + "\n"
+               cardContent += "Source: OpenSecrets.org";
            this.emit(':askWithCard', GunControlResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
           });
 
@@ -255,9 +283,28 @@ var handlers = {
 
     if (legislatorsDataSet.lawmakers.hasOwnProperty(legislator)) {
       var object = legislatorsDataSet.lawmakers[legislator];
+      const params = {
+        TableName: LEGISLATORS_APP_TABLE_NAME,
+        Key:{
+          "id": object.bioguide_id
+        }
+      };
+      // Get legislator data from DynamoDB
+      readDynamoItem(params, dataSet=>{
+
+        // TODO: Fix on import and remove this
+
+        if (dataSet.Item.type == 'sen') {
+          dataSet.Item.type = 'Senator';
+        }
+        else {
+          // deal with rep.
+          dataSet.Item.type = 'Representative';
+        }
 
       var BioguideResponse = "The biographical information for " + object.bioguide_data
-          BioguideResponse += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/>  how did " + legislator  + "  vote on Obamacare.";
+          BioguideResponse += "The source for this biographical information is bioguide.congress.gov."
+          BioguideResponse += "<break time='1000ms'/> Would you like to know how " + legislator  + "  voted on Obamacare.";
 
       var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
       var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
@@ -270,11 +317,14 @@ var handlers = {
 
       this.attributes['handler'] = "ReturnBioguide";
       this.attributes['lawmaker'] = legislator;
+      // Set Session Attributes for Context
+      this.attributes['NextIntent'] = 'ReturnObamacare';
 
-      var cardTitle = legislator.toUpperCase();
-      var cardContent = "The biographical information for " + legislator;
+      var cardTitle = dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name;
+      var cardContent = "The biographical information for " + dataSet.Item.first_name + " " + dataSet.Item.last_name + "\n";
+          cardContent += "Source URL: http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + object.bioguide_id
       this.emit(':askWithCard', BioguideResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
-
+    });
     }
     else {
       var notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
@@ -349,9 +399,11 @@ var handlers = {
         var LegislatorsContactInfoResponse = "The office phone number for "+ dataSet.Item.party + " " + dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name
             LegislatorsContactInfoResponse += " from " + object.state  + "" + district_str
             LegislatorsContactInfoResponse += " is " + dataSet.Item.phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.address
-            LegislatorsContactInfoResponse += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/> Get bioguide for " + legislator
-            // LegislatorsContactInfoResponse += "<break time='1000ms'/> if you want to call " + legislator + " now you can just say, Alexa dial " + dataSet.Item.phone
-            LegislatorsContactInfoResponse += "<break time='1000ms'/> or say help me.";
+            LegislatorsContactInfoResponse += "<break time='1000ms'/> The source for this contact information is @unitedstates github.com/unitedstates"
+            LegislatorsContactInfoResponse += "<break time='1000ms'/> Would you like to hear the bioguide for " + legislator + "?"
+            //LegislatorsContactInfoResponse += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/> Get bioguide for " + legislator
+            //LegislatorsContactInfoResponse += "<break time='1000ms'/> if you want to call " + legislator + " now you can just say, Alexa dial " + dataSet.Item.phone
+            //LegislatorsContactInfoResponse += "<break time='1000ms'/> or say help me.";
 
         var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
         var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
@@ -364,9 +416,12 @@ var handlers = {
 
         this.attributes['handler'] = "ReturnLegislatorsContactInfo";
         this.attributes['lawmaker'] = legislator;
+        // Set Session Attributes for Context
+        this.attributes['NextIntent'] = 'ReturnBioguide';
 
         var cardTitle = dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name;
-        var cardContent = "Phone: " + dataSet.Item.phone + "\n Mailing Address: " + dataSet.Item.address + "\n\n Website: " + dataSet.Item.url;
+        var cardContent = "Phone: " + dataSet.Item.phone + "\n Mailing Address: " + dataSet.Item.address + "\n\n Website: " + dataSet.Item.url + "\n"
+            cardContent += "The source for this contact information is @unitedstates https://github.com/unitedstates";
         this.emit(':askWithCard', LegislatorsContactInfoResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
       });
@@ -377,6 +432,29 @@ var handlers = {
       this.emit(':ask', notFoundPrompt, DEFAULT_REPROMPT);
     }
   },
+
+  // YesIntent.
+  'AMAZON.YesIntent': function () {
+    // Get Last Intent from Session Attributes
+    const NextIntent = this.attributes['NextIntent'];
+
+    // Last Intent Exists
+    if (NextIntent) {
+      OpearloAnalytics.registerVoiceEvent(this.event.session.user.userId, "Custom", "NextIntent: " + NextIntent);
+      if (NextIntent === 'Welcome') {
+        this.emitWithState('Welcome');
+      }
+      else {
+        this.emitWithState(NextIntent, this.attributes['lawmaker']);
+      }
+    }
+    // No NextIntent
+    else {
+      // Respond with Help Intent
+      this.emitWithState('AMAZON.HelpIntent');
+    }
+   },
+
 
   'AMAZON.RepeatIntent': function () {
     if (this.attributes['handler'] === "ReturnLegislatorsContactInfo") {
@@ -420,6 +498,10 @@ var handlers = {
        this.emit(':tell', randomGoodbye);
      });
    },
+  // SessionEndedRequest
+  'SessionEndedRequest': function () {
+     console.log('SessionEndedRequest.');
+  },
 
   'AMAZON.HelpIntent': function () {
     this.attributes['handler'] = "AMAZON.HelpIntent";
