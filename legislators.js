@@ -17,8 +17,9 @@ var DEFAULT_REPROMPT = "Who is your legislator? or for instructions, please say 
 
 // The bioguide_id, state and bioguide_data for current congress.
 var legislatorsDataSet = require("./data/legislators_data.js");
-var currentGunContrbutionDataSet = require("./data/legislators_gun_money_contributions.js");
+var currentGunContributionDataSet = require("./data/legislators_gun_money_contributions.js");
 var careerGunContrbutionDataSet = require("./data/legislators_gun_money_contributions_career.js");
+var currentNraContributionDataSet = require("./data/legislators_nra_contribution.js");
 
 // Setup some random goodbyes.
 const randomGoodbyes = [
@@ -157,14 +158,15 @@ var handlers = {
           // Get legislator data from DynamoDB
           readDynamoItem(params, dataSet=>{
             // console.log("Data: ", JSON.stringify(dataSet));
-            var currentGunContribution = currentGunContrbutionDataSet.gun_money_contributions[dataSet.Item.opensecrets_id];
+            var currentGunContribution = currentGunContributionDataSet.gun_money_contributions[dataSet.Item.opensecrets_id];
             var careerGunControlContribution = careerGunContrbutionDataSet.gun_money_contributions_career[dataSet.Item.opensecrets_id];
-
+            var currentNraContribution = currentNraContributionDataSet.nra_contributions[dataSet.Item.opensecrets_id];
+            console.log("Data: ", JSON.stringify(currentNraContribution));
             // console.log("dataSet.Item.opensecrets_id" + dataSet.Item.opensecrets_id + "DataSet" + currentGunContrbutionDataSet.gun_money_contributions[dataSet.Item.opensecrets_id]);
             // console.log("Data: ", JSON.stringify(currentGunContribution));
             //console.log("GunControlResponse: " + currentGunContribution);
             var GunControlResponse = lawmaker + " contrubutions for the 115 Congress based on the following categories."
-                GunControlResponse += "<break time='1000ms'/> Gun related contributions in 2016 to " + lawmaker + "'s <break time='1000ms'/> and Gun related contributions for the career if this legislator."
+                GunControlResponse += "<break time='1000ms'/> Gun related contributions in 2016 to " + lawmaker + "'s <break time='1000ms'/>,  Gun related contributions for the career if this legislator and all NRA contributions."
                 GunControlResponse += "<break time='1000ms'/> each section has six categories within it."
                 GunControlResponse += "<break time='1500ms'/> " + lawmaker + "'s contributions for the 2016."
                 GunControlResponse += "<break time='1000ms'/> PACS for Gun Control, total " + currentGunContribution.pacs_total_from_gun_control
@@ -180,6 +182,16 @@ var handlers = {
                 GunControlResponse += "<break time='1000ms'/> those who oppose gun control, total " + careerGunControlContribution.gun_control_opposed
                 GunControlResponse += "<break time='1000ms'/> those who support gun rights, total " + careerGunControlContribution.gun_rights_support
                 GunControlResponse += "<break time='1000ms'/> and those who oppose gun rights, total  " + careerGunControlContribution.gun_rights_opposed
+                GunControlResponse += "<break time='1500ms'/> NRA related contributions for " + lawmaker + "."
+                GunControlResponse += "<break time='1000ms'/> NRA Direct Support, total  " + currentNraContribution.nra_direct_support
+                GunControlResponse += "<break time='1000ms'/> NRA Independent Support, total  " + currentNraContribution.nra_independent_support
+                GunControlResponse += "<break time='1000ms'/> NRA Independent Opposition, total  " + currentNraContribution.nra_independent_opposition
+                GunControlResponse += "<break time='1000ms'/> NRA Indep Expend for Opponent, total  " + currentNraContribution.nra_indep_expend_for_opponent
+                GunControlResponse += "<break time='1000ms'/> and NRA Indep Expend against opponent, total  " + currentNraContribution.nra_indep_expend_against_oppenent
+                GunControlResponse += "<break time='1000ms'/> with a Grand Total of " + currentNraContribution.nra_grand_total
+                //GunControlResponse += "<break time='1000ms'/> Rank, total  " + currentNraContribution.rank
+
+
                 GunControlResponse += "<break time='1500ms'/> The source for this information on " + lawmaker + " is from OpenSecrets.org"
                 GunControlResponse += "<break time='1000ms'/> You can get additional information by saying, Obamacare and " + lawmaker;
                 // Move this to a function need to stay DRY.
