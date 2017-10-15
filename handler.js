@@ -2,9 +2,12 @@
 
 const Alexa = require('alexa-sdk');
 
-module.exports.legislator_phone = (event, context, callback) => {
+// Constants
+var constants = require('./constants/constants');
+
+module.exports.legislators_contact_info = (event, context, callback) => {
   var alexa = Alexa.handler(event, context);
-  alexa.appId = "your.alexa.appid.should.be.here";
+  alexa.appId = constants.appId;
   alexa.registerHandlers(
     require("./legislators")
   );
