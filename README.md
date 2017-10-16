@@ -33,3 +33,23 @@ Alexa: will read content from Bioguide
 "Mitch McConnell" http://bioguide.congress.gov/scripts/biodisplay.pl?index=M000355
 
 "Kirsten Gillibrand" http://bioguide.congress.gov/scripts/biodisplay.pl?index=G000555
+
+## Useful Links ##
+
+* GovTravk.us (https://www.govtrack.us)
+
+* OpenSecrets.org (https://www.opensecrets.org/)
+
+* @unitedstates (https://github.com/unitedstates)
+
+* Amazon Developer Portal - (https://developer.amazon.com/alexa)
+
+* AWS Lambda - (https://aws.amazon.com/console/)
+
+* Serverless - (https://serverless.com/)
+
+* AWS CLI - (https://aws.amazon.com/cli/)
+
+* Opearlo Alexa Skill Analytics - (https://analytics.opearlo.com/)
+
+* 11-opearlo-analytics - https://github.com/MerryOscar/voice-devs-lessons/tree/master/11-opearlo-analytics
