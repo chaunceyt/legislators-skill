@@ -1,11 +1,35 @@
 service: legislators-contact-info
 
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+custom:
+  app_prefix: us-legislator
+  default_stage: dev
+  stack_name: ${self:custom.app_prefix}-${self:custom.default_stage}
+  operarlo_api_key: "changeme"
+  operarlo_user_id: "changeme"
+  operarlo_voice_app_name: "changeme"
+  s3_bucket: ${self:custom.app_prefix}-${self:custom.default_stage}
+  default_region: us-east-1
+  deletion_policy: Delete
+
 provider:
   name: aws
   runtime: nodejs6.10
   stage: dev
   region: us-east-1
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+    OPEARLO_API_KEY: ${self:custom.operarlo_api_key}
+    OPEARLO_USER_ID: ${self:custom.operarlo_user_id}
+    OPEARLO_VOICE_APP_NAME: ${self:custom.operarlo_voice_app_name}
+  region: ${self:custom.default_region}
   timeout: 10
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 functions:
   legislators_contact_info:
@@ -14,3 +38,27 @@ functions:
     handler: handler.legislators_contact_info
     events:
       - alexaSkill
+
+resources:
+  Resources:
+    LegislatorDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: ${self:custom.deletion_policy}
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+    LegislatorImagesS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3_bucket}
+        AccessControl: 'PublicRead'
