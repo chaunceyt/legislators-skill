@@ -5,7 +5,7 @@ const AWS = require('aws-sdk');
 const OpearloAnalytics = require('opearlo-analytics');
 
 const AWSregion = 'us-east-1';
-const LEGISLATORS_APP_TABLE_NAME = 'current-legislators-dev';
+const LEGISLATORS_APP_TABLE_NAME = process.env.DYNAMODB_TABLE;
 
 AWS.config.update({
   region: AWSregion
