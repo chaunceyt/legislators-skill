@@ -81,12 +81,12 @@ const handlers = {
 
               // TODO: Fix on import and remove this
 
-              if (dataSet.Item.type == 'sen') {
-              dataSet.Item.type = 'Senator';
+              if (dataSet.Item.leg_type == 'sen') {
+              dataSet.Item.leg_type = 'Senator';
               }
               else {
               // deal with rep.
-              dataSet.Item.type = 'Representative';
+              dataSet.Item.leg_type = 'Representative';
               }
 
               var BioguideResponse = "The biographical information for " + object.bioguide_data
@@ -105,8 +105,8 @@ const handlers = {
               this.attributes['lawmaker'] = legislator;
               // Set Session Attributes for Context
 
-              var cardTitle = dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name;
-              var cardContent = "The biographical information for " + dataSet.Item.first_name + " " + dataSet.Item.last_name + "\n";
+              var cardTitle = dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name;
+              var cardContent = "The biographical information for " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name + "\n";
               cardContent += "Source URL: http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + object.bioguide_id;
 
               this.emit(':askWithCard', BioguideResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
@@ -154,7 +154,7 @@ const handlers = {
               // console.log("Data: ", JSON.stringify(dataSet));
               var gender_ref = '';
 
-              if (dataSet.Item.gender === 'M') {
+              if (dataSet.Item.leg_gender === 'M') {
                 gender_ref = "his";
               }
               else {
@@ -162,28 +162,28 @@ const handlers = {
               }
 
               // TODO: Fix on import and remove this
-              if (dataSet.Item.party === 'Democrat') {
-                dataSet.Item.party = 'Democratic';
+              if (dataSet.Item.leg_party === 'Democrat') {
+                dataSet.Item.leg_party = 'Democratic';
               }
 
               // dataSet.Item.type is either sen or rep
-              if (dataSet.Item.type == 'sen') {
-                dataSet.Item.type = 'Senator';
+              if (dataSet.Item.leg_type == 'sen') {
+                dataSet.Item.leg_type = 'Senator';
               }
               else {
                 // deal with rep.
-                dataSet.Item.type = 'Representative';
+                dataSet.Item.leg_type = 'Representative';
               }
 
               // If this is a Representative mention their district.
               var district_str = ' ';
-              if (dataSet.Item.type === 'Representative') {
+              if (dataSet.Item.leg_type === 'Representative') {
                 district_str = ", district " + object.district;
               }
 
-            var LegislatorsContactInfoResponse = "The office phone number for "+ dataSet.Item.party + " " + dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name
-                LegislatorsContactInfoResponse += " from " + object.state  + "" + district_str
-                LegislatorsContactInfoResponse += " is " + dataSet.Item.phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.address
+            var LegislatorsContactInfoResponse = "The office phone number for "+ dataSet.Item.leg_party + " " + dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name
+                LegislatorsContactInfoResponse += " from " + object.leg_state  + "" + district_str
+                LegislatorsContactInfoResponse += " is " + dataSet.Item.leg_phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.leg_address
                 LegislatorsContactInfoResponse += "<break time='1000ms'/> The source for this contact information is @unitedstates github.com/unitedstates"
                 LegislatorsContactInfoResponse += "<break time='1000ms'/> Would you like to hear the bioguide for " + legislator + "?"
                 //LegislatorsContactInfoResponse += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/> Get bioguide for " + legislator
@@ -204,8 +204,8 @@ const handlers = {
               // Set Session Attributes for Context
               this.attributes['NextIntent'] = 'ReturnBioguide';
 
-              const cardTitle = dataSet.Item.type + " " + dataSet.Item.first_name + " " + dataSet.Item.last_name;
-              var cardContent = "Phone: " + dataSet.Item.phone + "\n Mailing Address: " + dataSet.Item.address + "\n\n Website: " + dataSet.Item.url + "\n"
+              const cardTitle = dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name;
+              var cardContent = "Phone: " + dataSet.Item.leg_phone + "\n Mailing Address: " + dataSet.Item.leg_address + "\n\n Website: " + dataSet.Item.leg_url + "\n"
               cardContent += "The source for this contact information is @unitedstates https://github.com/unitedstates";
               this.emit(':askWithCard', LegislatorsContactInfoResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
