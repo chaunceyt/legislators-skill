@@ -6,42 +6,6 @@
 * [Opearlo Alexa Skill Analytics](https://analytics.opearlo.com/)
 
 ## Installation
-**AWScli**
-
-**Create S3 bucket**
-
-```
-aws s3 mb s3://BUCKET_NAME/ --region REGION
-aws s3api put-bucket-policy --bucket BUCKET_NAME \
-	--policy file:///tmp/s3-bucket-policy.json  \
-	--region REGION
-```
-Policy file: `s3-bucket-policy.json`
-
-```
-{
-  "Version":"2012-10-17",
-  "Statement":[{
-    "Sid":"PublicReadForGetBucketObjects",
-    "Effect":"Allow",
-    "Principal": "*",
-    "Action":["s3:GetObject"],
-    "Resource":["arn:aws:s3:::BUCKET_NAME/*"
-    ]
-  }
-  ]
-}
-```
-
-
-**Import data into DynamoDB**
-
-```
-aws dynamodb batch-write-item \
-	--request-items file://legislators-contact-info-dev.json`
-```
-
-Install Skill
 
 ```
 npm install serverless -g
@@ -51,6 +15,16 @@ npm install
 npm install serverless -g
 serverless deploy
 ```
+
+**Import data into DynamoDB**
+
+```
+cd importer
+wget https://theunitedstates.io/congress-legislators/legislators-current.csv
+npm install
+npm run populate-db
+```
+
 After the completion of the `serverless deploy -y` you should see the ARN for your function. 
 
 ## Create Alexa Skill
@@ -78,4 +52,5 @@ After the completion of the `serverless deploy -y` you should see the ARN for yo
 	* Service Simulator - the EventSource for the Lambda function.
 * **Publishing Information**
 * **Privacy & Compliance**
+
 
