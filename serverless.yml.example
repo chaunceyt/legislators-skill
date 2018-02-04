@@ -2,6 +2,13 @@ service: legislators-contact-info
 
 frameworkVersion: ">=1.1.0 <2.0.0"
 
+package:
+  exclude:
+    - importer/**
+    - speechAssets/**
+    - .git/**
+    - serverless.yml.example
+
 custom:
   app_prefix: us-legislator
   default_stage: dev
