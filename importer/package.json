@@ -1,0 +1,16 @@
+{
+  "name": "import_current-legislators_csv_file",
+  "version": "1.0.3",
+  "description": "Batch import a large amount of data to the DynamoDB",
+  "main": "dynamodb-importer.js",
+  "scripts": {
+    "populate-db": "node dynamodb-importer.js"
+  },
+  "author": "Chauncey Thorn",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.5.0",
+    "aws-sdk": "^2.86.0",
+    "csv-parse": "^1.2.0"
+  }
+}
