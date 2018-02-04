@@ -6,42 +6,8 @@
 * [Opearlo Alexa Skill Analytics](https://analytics.opearlo.com/)
 
 ## Installation
-**AWScli**
 
-**Create S3 bucket**
-
-```
-aws s3 mb s3://BUCKET_NAME/ --region REGION
-aws s3api put-bucket-policy --bucket BUCKET_NAME \
-	--policy file:///tmp/s3-bucket-policy.json  \
-	--region REGION
-```
-Policy file: `s3-bucket-policy.json`
-
-```
-{
-  "Version":"2012-10-17",
-  "Statement":[{
-    "Sid":"PublicReadForGetBucketObjects",
-    "Effect":"Allow",
-    "Principal": "*",
-    "Action":["s3:GetObject"],
-    "Resource":["arn:aws:s3:::BUCKET_NAME/*"
-    ]
-  }
-  ]
-}
-```
-
-
-**Import data into DynamoDB**
-
-```
-aws dynamodb batch-write-item \
-	--request-items file://legislators-contact-info-dev.json`
-```
-
-Install Skill
+Create Opearlo Alexa Skill Analytics account and create a Voice Application. NOTE the App Name.
 
 ```
 npm install serverless -g
@@ -49,8 +15,21 @@ git clone https://github.com/chaunceyt/legislators-skill.git
 cd legislators-skill
 npm install
 npm install serverless -g
-serverless deploy
+cd constants/ # cp constants.js.sample to constants.js and add alexa skill appId
+cd ../
+vi serverless.yml # change the OPEARLO_API_KEY, OPEARLO_USER_ID, and OPEARLO_VOICE_APP_NAME values
+serverless deploy # you will have to run again. This is deploy is to get the table ready for importing the data.
 ```
+
+**Import data into DynamoDB**
+
+```
+cd importer
+wget https://theunitedstates.io/congress-legislators/legislators-current.csv
+npm install
+npm run populate-db
+```
+
 After the completion of the `serverless deploy -y` you should see the ARN for your function. 
 
 ## Create Alexa Skill
@@ -78,4 +57,9 @@ After the completion of the `serverless deploy -y` you should see the ARN for yo
 	* Service Simulator - the EventSource for the Lambda function.
 * **Publishing Information**
 * **Privacy & Compliance**
+
+Now got back and update constants/constants.js adding the Alexa Skill kit "Application Id"
+
+i.e. amzn1.ask.skill.XXXXX-XXXXX-XXXXXX-XXXXX
+run serverless deploy
 

@@ -19,9 +19,11 @@ Download: CSV
 ```
 ## AWS Services used ##
 
-* DynamoDB
+* API Gateway
 
 * AWS Lambda Node.js 6.10
+
+* DynamoDB
 
 * S3 bucket for legislator images
 
@@ -40,6 +42,11 @@ Alexa: will read content from Bioguide
 "Mitch McConnell" http://bioguide.congress.gov/scripts/biodisplay.pl?index=M000355
 
 "Kirsten Gillibrand" http://bioguide.congress.gov/scripts/biodisplay.pl?index=G000555
+
+## Interacting with Web API
+
+* /legislators - get all list of all the legislators
+* /legislators/{legislatorId} - get this legislator
 
 ## Useful Links ##
 

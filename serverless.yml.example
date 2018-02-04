@@ -38,6 +38,27 @@ functions:
     events:
       - alexaSkill
 
+  get:
+    handler: api/get.get
+    events:
+      - http:
+          path: legislators/{legislatorId}
+          integration: lambda
+          method: get
+          request:
+            template:
+              application/json: '{ "legislatorId" : "$input.params(''legislatorId'')" }'
+          cors: true
+
+  list:
+    handler: api/list.list
+    events:
+      - http:
+          path: legislators
+          integration: lambda
+          method: get
+          cors: true
+
 resources:
   Resources:
     LegislatorDynamoDbTable:
