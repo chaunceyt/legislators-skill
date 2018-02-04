@@ -7,13 +7,18 @@
 
 ## Installation
 
+Create Opearlo Alexa Skill Analytics account and create a Voice Application. NOTE the App Name.
+
 ```
 npm install serverless -g
 git clone https://github.com/chaunceyt/legislators-skill.git
 cd legislators-skill
 npm install
 npm install serverless -g
-serverless deploy
+cd constants/ # cp constants.js.sample to constants.js and add alexa skill appId
+cd ../
+vi serverless.yml # change the OPEARLO_API_KEY, OPEARLO_USER_ID, and OPEARLO_VOICE_APP_NAME values
+serverless deploy # you will have to run again. This is deploy is to get the table ready for importing the data.
 ```
 
 **Import data into DynamoDB**
@@ -53,4 +58,8 @@ After the completion of the `serverless deploy -y` you should see the ARN for yo
 * **Publishing Information**
 * **Privacy & Compliance**
 
+Now got back and update constants/constants.js adding the Alexa Skill kit "Application Id"
+
+i.e. amzn1.ask.skill.XXXXX-XXXXX-XXXXXX-XXXXX
+run serverless deploy
 
