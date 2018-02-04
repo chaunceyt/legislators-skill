@@ -43,7 +43,7 @@ Alexa: will read content from Bioguide
 
 "Kirsten Gillibrand" http://bioguide.congress.gov/scripts/biodisplay.pl?index=G000555
 
-## Simple API
+## Interacting with Web API
 
 * /legislators - get all list of all the legislators
 * /legislators/{legislatorId} - get this legislator
