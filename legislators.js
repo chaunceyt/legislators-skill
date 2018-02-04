@@ -182,7 +182,7 @@ const handlers = {
               }
 
             var LegislatorsContactInfoResponse = "The office phone number for "+ dataSet.Item.leg_party + " " + dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name
-                LegislatorsContactInfoResponse += " from " + object.leg_state  + "" + district_str
+                LegislatorsContactInfoResponse += " from " + object.state  + "" + district_str
                 LegislatorsContactInfoResponse += " is " + dataSet.Item.leg_phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.leg_address
                 LegislatorsContactInfoResponse += "<break time='1000ms'/> The source for this contact information is @unitedstates github.com/unitedstates"
                 LegislatorsContactInfoResponse += "<break time='1000ms'/> Would you like to hear the bioguide for " + legislator + "?"
