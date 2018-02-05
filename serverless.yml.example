@@ -59,6 +59,19 @@ functions:
               application/json: '{ "legislatorId" : "$input.params(''legislatorId'')" }'
           cors: true
 
+
+  bystate:
+    handler: api/state.bystate
+    events:
+      - http:
+          path: legislators/by-state/{state}
+          integration: lambda
+          method: get
+          request:
+            template:
+              application/json: '{ "state" : "$input.params(''state'')" }'
+          cors: true
+
   list:
     handler: api/list.list
     events:

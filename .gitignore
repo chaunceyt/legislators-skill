@@ -1,3 +1,4 @@
 .serverless/
 node_modules/
 serverless.yml
+constants/constants.js
