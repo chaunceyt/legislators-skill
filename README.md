@@ -27,6 +27,10 @@ Download: CSV
 
 * S3 bucket for legislator images
 
+## Overview ##
+
+![architecture-overview](images/LegislatorsSkillRefarch.png)
+
 ## Interacting with Skill ##
 
 Alexa legislators contact info
