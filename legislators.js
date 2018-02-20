@@ -19,6 +19,7 @@ const DEFAULT_REPROMPT = "Who is your legislator? or for instructions, please sa
 
 // The bioguide_id, state and bioguide_data for current congress.
 const legislatorsDataSet = require("./data/legislators_data.js");
+const StateNameDataSet = require("./data/states_data.js");
 
 // Setup some random goodbyes.
 const randomGoodbyes = [
@@ -218,6 +219,40 @@ const handlers = {
         }
       },
 
+      'MyStateLegislators': function () {
+
+          const stateName = this.event.request.intent.slots.StateName.value || false;
+          console.log('Statename: ' + stateName);
+          let stateAbbrev = StateNameDataSet.states[stateName];
+          console.log('MystateLegislators' + JSON.stringify(stateName));
+
+          // Setup our DynamoDB params
+          const params = {
+            TableName: LEGISLATORS_APP_TABLE_NAME,
+            IndexName: 'leg_state-index',
+            KeyConditionExpression: "#leg_state = :state",
+            ExpressionAttributeNames:{
+              "#leg_state": "leg_state"
+            },
+            ExpressionAttributeValues: {
+              ":state": stateAbbrev
+            }
+          };
+
+          var StateLegislatorsResponse = "The following are legislators in " +  stateName + ", "
+
+          // Get legislator data from DynamoDB
+          queryDynamoItems(params, dataSet=>{
+            console.log("Data: ", JSON.stringify(dataSet));
+            dataSet.Items.forEach(function(item) {
+                StateLegislatorsResponse += item.leg_first_name + " " + item.leg_last_name + ", "
+            });
+            StateLegislatorsResponse += " Which would you like to contact?"
+            this.emit(':ask', StateLegislatorsResponse, DEFAULT_REPROMPT);
+          });
+
+      },
+
       // YesIntent.
       'AMAZON.YesIntent': function () {
         // Get Last Intent from Session Attributes
@@ -325,4 +360,22 @@ function readDynamoItem(params, callback) {
       });
 }
 
+function queryDynamoItems(params, callback) {
+
+  var AWS = require('aws-sdk');
+  AWS.config.update({region: AWSregion});
+
+  var docClient = new AWS.DynamoDB.DocumentClient();
+
+  docClient.query(params, (err, data) => {
+      if (err) {
+      // Custom Voice Event
+      // OpearloAnalytics.registerVoiceEvent(this.event.session.user.userId, "Custom", "DynamoDB Read Item Error");
+      console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+      } else {
+      // console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+      callback(data);
+      }
+      });
+}
 module.exports = handlers;
