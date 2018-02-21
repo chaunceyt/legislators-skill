@@ -4,20 +4,22 @@ const AWS = require('aws-sdk');
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-module.exports.get = (event, context, callback) => {
+module.exports.bystate = (event, context, callback) => {
   console.log(context);
   console.log(event);
 
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     ReturnConsumedCapacity: 'TOTAL',
-    Key: {
-      id: event.legislatorId,
+    IndexName: 'leg_state-index',
+    KeyConditionExpression: 'leg_state = :leg_state',
+    ExpressionAttributeValues: {
+      ':leg_state': event.state
     },
   };
 
   // fetch legislator from the database
-  dynamoDb.get(params, (error, result) => {
+  dynamoDb.query(params, (error, result) => {
     // handle potential errors
     if (error) {
       console.error(error);
@@ -34,7 +36,7 @@ module.exports.get = (event, context, callback) => {
     // create a response
     const response = {
       statusCode: 200,
-      body: result.Item,
+      body: result.Items,
     };
     callback(null, response);
   });

@@ -5,10 +5,12 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const params = {
   TableName: process.env.DYNAMODB_TABLE,
+  ReturnConsumedCapacity: 'TOTAL',
 };
 
 module.exports.list = (event, context, callback) => {
   console.log(context);
+  console.log(event);
 
   // fetch all legislators from the database
   // This could be an expensive action. However, we only have less than 600 items.
@@ -23,6 +25,8 @@ module.exports.list = (event, context, callback) => {
       });
       return;
     }
+ 
+    console.log(null, result);
 
     // create a response
     // body: JSON.stringify(result.Items),
