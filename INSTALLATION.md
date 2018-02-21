@@ -31,6 +31,14 @@ npm install
 npm run populate-db
 ```
 
+*** Manually create a Global Secondary Index (GSI) ***
+* Log into the AWS console and navigate to DynamoDB under "Databases"
+* Click on the legislators-contact-info-dev table
+* Click on the "Indexes" tab (see screenshots below for values)
+
+![create-global-secondary-index](images/create_index.png)
+![global-secondary-index](images/create_gsi.png)
+
 After the completion of the `serverless deploy -y` you should see the ARN for your function. 
 
 ## Create Alexa Skill
