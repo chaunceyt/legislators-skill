@@ -11,10 +11,11 @@ AWS.config.update({
   region: AWSregion
 });
 
-const DEFAULT_REPROMPT = "Who is your legislator? or for instructions, please say help, help me or can you help me.",
+const DEFAULT_REPROMPT = "Who is your legislator? or for instructions, say help.",
     DELAYED_REPROMPT = "<break time='2500ms'/>" + DEFAULT_REPROMPT,
+    DEFAULT_STARTOVER_PROMPT = "Which other legislator would you like contact info for? or for instructions, say help.",
     DEFAULT_NOTFOUNDPROMPT = "I'm sorry, I could not understand that Legislators name. Please try again, saying their first and last name.",
-    DEFAULT_WELCOMEPROMPT = "Hello, Welcome to the U.S. Legislators info system!. Who is your legislator?.",
+    DEFAULT_WELCOMEPROMPT = "Hello, Welcome to the U.S. Legislators info system!. What state are you from?.",
     DEFAULT_NOINTENT = 'Okay, see you next time!'
 
 // The bioguide_id, state and bioguide_data for current congress.
@@ -47,6 +48,11 @@ const handlers = {
       'Welcome': function () {
         var prompt = DEFAULT_WELCOMEPROMPT;
         this.emit(':ask', prompt, DEFAULT_REPROMPT);
+      },
+
+      'StartOver': function () {
+        var prompt = DEFAULT_STARTOVER_PROMPT;
+        this.emit(':ask', prompt);
       },
 
       //=========================================================================================================================================
@@ -182,14 +188,10 @@ const handlers = {
                 district_str = ", district " + object.district;
               }
 
-            var LegislatorsContactInfoResponse = "The office phone number for "+ dataSet.Item.leg_party + " " + dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name
+            let LegislatorsContactInfoResponse = "The office phone number for "+ dataSet.Item.leg_party + " " + dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name
                 LegislatorsContactInfoResponse += " from " + object.state  + "" + district_str
                 LegislatorsContactInfoResponse += " is " + dataSet.Item.leg_phone + " and " + gender_ref + " office mailing address is " + dataSet.Item.leg_address
-                LegislatorsContactInfoResponse += "<break time='1000ms'/> The source for this contact information is @unitedstates github.com/unitedstates"
                 LegislatorsContactInfoResponse += "<break time='1000ms'/> Would you like to hear the bioguide for " + legislator + "?"
-                //LegislatorsContactInfoResponse += "<break time='1000ms'/> You can also get additional information if you say <break time='300ms'/> Get bioguide for " + legislator
-                //LegislatorsContactInfoResponse += "<break time='1000ms'/> if you want to call " + legislator + " now you can just say, Alexa dial " + dataSet.Item.phone
-                LegislatorsContactInfoResponse += "<break time='1000ms'/> or say help me.";
 
               const LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
               const LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
@@ -206,7 +208,7 @@ const handlers = {
               this.attributes['NextIntent'] = 'ReturnBioguide';
 
               const cardTitle = dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name;
-              var cardContent = "Phone: " + dataSet.Item.leg_phone + "\n Mailing Address: " + dataSet.Item.leg_address + "\n\n Website: " + dataSet.Item.leg_url + "\n"
+              let cardContent = "Phone: " + dataSet.Item.leg_phone + "\n Mailing Address: " + dataSet.Item.leg_address + "\n\n Website: " + dataSet.Item.leg_url + "\n"
               cardContent += "The source for this contact information is @unitedstates https://github.com/unitedstates";
               this.emit(':askWithCard', LegislatorsContactInfoResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
 
@@ -220,6 +222,8 @@ const handlers = {
       },
 
       'MyStateLegislators': function () {
+          console.log(this.event);
+          console.log(this.context);
 
           const stateName = this.event.request.intent.slots.StateName.value || false;
           console.log('Statename: ' + stateName);
@@ -229,7 +233,7 @@ const handlers = {
           // Setup our DynamoDB params
           const params = {
             TableName: LEGISLATORS_APP_TABLE_NAME,
-            IndexName: 'leg_state-index',
+            IndexName: 'leg-state-type-index',
             KeyConditionExpression: "#leg_state = :state",
             ExpressionAttributeNames:{
               "#leg_state": "leg_state"
@@ -289,6 +293,7 @@ const handlers = {
         }
       },
 
+
       //=========================================================================================================================================
       // AMAZON.buildin intents.
       // https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/supported-phrases-to-begin-a-conversation
@@ -315,7 +320,7 @@ const handlers = {
       'AMAZON.NoIntent': function () {
         // Handle No intent.
         OpearloAnalytics.recordAnalytics(this.event.session.user.userId, process.env.OPEARLO_API_KEY, (result)=> {
-            this.emit(':tell', randomGoodbye);
+            this.emit('StartOver');
         });
       },
       // SessionEndedRequest

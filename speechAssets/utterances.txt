@@ -1,14 +1,13 @@
-Obamacare how did {LegislatorName} vote on Obamacare
-Obamacare {LegislatorName} and Obamacare
-Obamacare {LegislatorName} stance on Obamacare
-
-GunControl what contributions did {LegislatorName} get related to Gun control.
-GunControl gun control contributions for {LegislatorName}
-
 Bioguide get bioguide for {LegislatorName}
 Bioguide resume for {LegislatorName}
 Bioguide bioguide for {LegislatorName}
 
 Legislators {LegislatorName}
+Legislators Representative {LegislatorName}
+Legislators Senator {LegislatorName}
 Legislators contact info for {LegislatorName}
 Legislators how do I contact {LegislatorName}
+
+MyStateLegislators {StateName}
+MyStateLegislators {StateName} legislators
+MyStateLegislators legislators from {StateName}
