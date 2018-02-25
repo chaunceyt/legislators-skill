@@ -27,7 +27,6 @@ const randomGoodbyes = [
   'Bye for now!',
   'Goodbye!',
   'Thanks for using U.S. Legislators info system!',
-  'Chat soon!',
   'Okay, see you next time!'
 ];
 
@@ -46,12 +45,12 @@ const handlers = {
       },
 
       'Welcome': function () {
-        var prompt = DEFAULT_WELCOMEPROMPT;
+        let prompt = DEFAULT_WELCOMEPROMPT;
         this.emit(':ask', prompt, DEFAULT_REPROMPT);
       },
 
       'StartOver': function () {
-        var prompt = DEFAULT_STARTOVER_PROMPT;
+        let prompt = DEFAULT_STARTOVER_PROMPT;
         this.emit(':ask', prompt);
       },
 
@@ -60,22 +59,26 @@ const handlers = {
       //=========================================================================================================================================
 
       'Bioguide': function () {
-        var legislator = this.event.request.intent.slots.LegislatorName.value || false;
+        let legislator = this.event.request.intent.slots.LegislatorName.value || false;
+        console.log(this.event);
+        console.log(this.context);
 
         if (legislator) {
           this.emit('ReturnBioguide', legislator);
         }
         else {
-          var notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
+          let notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
           this.emit(':ask', notFoundPrompt, DELAYED_REPROMPT);
         }
       },
 
       'ReturnBioguide': function (legislatorName) {
-        var legislator = legislatorName.toLowerCase();
+        let legislator = legislatorName.toLowerCase();
+        console.log(this.event);
+        console.log(this.context);
 
         if (legislatorsDataSet.lawmakers.hasOwnProperty(legislator)) {
-          var object = legislatorsDataSet.lawmakers[legislator];
+          let object = legislatorsDataSet.lawmakers[legislator];
           const params = {
             TableName: LEGISLATORS_APP_TABLE_NAME,
             Key:{
@@ -96,14 +99,14 @@ const handlers = {
               dataSet.Item.leg_type = 'Representative';
               }
 
-              var BioguideResponse = "The biographical information for " + object.bioguide_data
+              let BioguideResponse = "The biographical information for " + object.bioguide_data
               BioguideResponse += "The source for this biographical information is bioguide.congress.gov.";
 
-              var LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
-              var LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
+              let LegislatorLargeimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/512x512/" + object.bioguide_id + ".jpg";
+              let LegislatorSmallimageUrlPath = "https://s3.amazonaws.com/uslegislators-images/108x108/" + object.bioguide_id + ".jpg";
               // console.log("Image Path: " + LegislatorimageUrlPath);
 
-              var imageObj = {
+              let imageObj = {
                 smallImageUrl: LegislatorSmallimageUrlPath,
                 largeImageUrl: LegislatorLargeimageUrlPath
               };
@@ -112,15 +115,15 @@ const handlers = {
               this.attributes['lawmaker'] = legislator;
               // Set Session Attributes for Context
 
-              var cardTitle = dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name;
-              var cardContent = "The biographical information for " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name + "\n";
+              let cardTitle = dataSet.Item.leg_type + " " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name;
+              let cardContent = "The biographical information for " + dataSet.Item.leg_first_name + " " + dataSet.Item.leg_last_name + "\n";
               cardContent += "Source URL: http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + object.bioguide_id;
 
               this.emit(':askWithCard', BioguideResponse, DEFAULT_REPROMPT, cardTitle, cardContent, imageObj);
           });
         }
         else {
-          var notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
+          let notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
           this.emit(':ask', notFoundPrompt, DEFAULT_REPROMPT);
         }
       },
@@ -131,18 +134,22 @@ const handlers = {
 
       'Legislators': function () {
         const legislator = this.event.request.intent.slots.LegislatorName.value || false;
+          console.log(this.event);
+          console.log(this.context);
 
         if (legislator) {
           this.emit('ReturnLegislatorsContactInfo', legislator);
         }
         else {
-          var notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
+          let notFoundPrompt = DEFAULT_NOTFOUNDPROMPT;
           this.emit(':ask', notFoundPrompt, DELAYED_REPROMPT);
         }
       },
 
       'ReturnLegislatorsContactInfo': function (legislatorName) {
-
+          console.log(this.event);
+          console.log(this.context);
+    
         const legislator = legislatorName.toLowerCase();
 
         if (legislatorsDataSet.lawmakers.hasOwnProperty(legislator)) {
@@ -159,7 +166,7 @@ const handlers = {
           // Get legislator data from DynamoDB
           readDynamoItem(params, dataSet=>{
               // console.log("Data: ", JSON.stringify(dataSet));
-              var gender_ref = '';
+              let gender_ref = '';
 
               if (dataSet.Item.leg_gender === 'M') {
                 gender_ref = "his";
@@ -183,7 +190,7 @@ const handlers = {
               }
 
               // If this is a Representative mention their district.
-              var district_str = ' ';
+              let district_str = ' ';
               if (dataSet.Item.leg_type === 'Representative') {
                 district_str = ", district " + object.district;
               }
@@ -243,7 +250,7 @@ const handlers = {
             }
           };
 
-          var StateLegislatorsResponse = "The following are legislators in " +  stateName + ", "
+          let StateLegislatorsResponse = "The following are legislators in " +  stateName + ", "
 
           // Get legislator data from DynamoDB
           queryDynamoItems(params, dataSet=>{
@@ -259,6 +266,8 @@ const handlers = {
 
       // YesIntent.
       'AMAZON.YesIntent': function () {
+        console.log(this.event);
+        console.log(this.context);
         // Get Last Intent from Session Attributes
         const NextIntent = this.attributes['NextIntent'];
 
@@ -330,7 +339,7 @@ const handlers = {
 
       'AMAZON.HelpIntent': function () {
         this.attributes['handler'] = "AMAZON.HelpIntent";
-        var HelpIntentPrompt = "Welcome to the U.S Legislators info service. The information here relates to the 115th United States Congress January 3, 2017 thru January 3, 2019"
+        let HelpIntentPrompt = "Welcome to the U.S Legislators info service. The information here relates to the 115th United States Congress January 3, 2017 thru January 3, 2019"
           HelpIntentPrompt += "<break time='1500ms'/> You can say. Contact information for legislator, Just speak the legislator's firstname and lastname"
           HelpIntentPrompt += "<break time='1500ms'/> or you can say Get bioguide for firstname and lastname"
           HelpIntentPrompt += "<break time='1500ms'/> or you can say cancel, never mind, forget it..."
@@ -348,10 +357,10 @@ const handlers = {
 
 function readDynamoItem(params, callback) {
 
-  var AWS = require('aws-sdk');
+  let AWS = require('aws-sdk');
   AWS.config.update({region: AWSregion});
 
-  var docClient = new AWS.DynamoDB.DocumentClient();
+  let docClient = new AWS.DynamoDB.DocumentClient();
 
   docClient.get(params, (err, data) => {
       if (err) {
@@ -367,10 +376,10 @@ function readDynamoItem(params, callback) {
 
 function queryDynamoItems(params, callback) {
 
-  var AWS = require('aws-sdk');
+  let AWS = require('aws-sdk');
   AWS.config.update({region: AWSregion});
 
-  var docClient = new AWS.DynamoDB.DocumentClient();
+  let docClient = new AWS.DynamoDB.DocumentClient();
 
   docClient.query(params, (err, data) => {
       if (err) {
