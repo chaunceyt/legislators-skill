@@ -41,7 +41,7 @@ npm run populate-db
 
 *** Use shell script to create Global Secondary Index (GSI) ***
 * Recommended:  ./create-gsi.sh (required aws cli configured)
-* This is a work around not being able to create GSI via serverless.yml (WIP)
+* This is a work around for not being able to create GSI via serverless.yml (WIP)
 
 After the completion of the `serverless deploy -y` you should see the ARN for your function. 
 
