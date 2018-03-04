@@ -39,6 +39,10 @@ npm run populate-db
 ![create-global-secondary-index](images/create_index.png)
 ![global-secondary-index](images/create_gsi.png)
 
+*** Use shell script to create Global Secondary Index (GSI) ***
+* Recommended:  ./create-gsi.sh (required aws cli configured)
+* This is a work around for not being able to create GSI via serverless.yml (WIP)
+
 After the completion of the `serverless deploy -y` you should see the ARN for your function. 
 
 ## Create Alexa Skill
